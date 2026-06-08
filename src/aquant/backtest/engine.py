@@ -28,7 +28,15 @@ class BacktestEngine:
         for trade_date in self.data_repo.get_trading_days(start, end):
             if self._is_rebalance_day(trade_date):
                 universe = self.universe_builder.build(trade_date)
+                if universe.empty:
+                    self.broker.snapshot(trade_date)
+                    continue
+
                 factors = self.factor_service.load_or_calculate(trade_date, universe)
+                if factors.empty:
+                    self.broker.snapshot(trade_date)
+                    continue
+
                 predictions = self.predictor.predict(trade_date, factors)
                 targets = self.portfolio_builder.build(trade_date, predictions)
                 orders = self.broker.generate_rebalance_orders(targets, trade_date)

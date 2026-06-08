@@ -31,6 +31,9 @@ class FactorService:
         ]
 
     def load_or_calculate(self, trade_date: date, universe: pd.DataFrame) -> pd.DataFrame:
+        if universe.empty or "ts_code" not in universe:
+            return pd.DataFrame(columns=["ts_code", "trade_date"])
+
         ts_codes = universe["ts_code"].tolist()
         lookback_start = trade_date - timedelta(days=140)
         bars = self.data_repo.get_daily_bars(ts_codes=ts_codes, start=lookback_start, end=trade_date)
