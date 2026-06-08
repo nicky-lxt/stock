@@ -5,7 +5,7 @@ AQuant is a local scaffold for an A-share AI factor quant trading system.
 The initial implementation focuses on the strategy discussed in the design:
 
 - Universe: CSI 300 (`000300.SH`) + CSI 500 (`000905.SH`)
-- Signal: LightGBM-compatible factor score pipeline, with a deterministic heuristic fallback
+- Signal: LightGBM factor score pipeline, with a deterministic heuristic fallback before training
 - Rebalance: weekly
 - Portfolio: Top 5, equal weight by default
 - Risk: ST/suspension/limit-up/full-lot/single-position/kill-switch checks
@@ -31,10 +31,41 @@ Generate weekly Top 5 targets:
 python scripts/predict_weekly.py --data data/sample --date 2023-12-29
 ```
 
+Train a local LightGBM model:
+
+```bash
+python scripts/train_model.py \
+  --data data/sample \
+  --train-start 2023-01-02 \
+  --train-end 2023-08-31 \
+  --valid-start 2023-09-01 \
+  --valid-end 2023-11-30 \
+  --model-version sample-lgbm
+```
+
+Generate targets using the trained model:
+
+```bash
+python scripts/predict_weekly.py \
+  --data data/sample \
+  --date 2023-12-29 \
+  --model data/models/sample-lgbm.joblib
+```
+
 Run a sample backtest:
 
 ```bash
 python scripts/run_backtest.py --data data/sample --start 2023-07-03 --end 2023-12-29
+```
+
+Run a sample backtest using the trained model:
+
+```bash
+python scripts/run_backtest.py \
+  --data data/sample \
+  --start 2023-07-03 \
+  --end 2023-12-29 \
+  --model data/models/sample-lgbm.joblib
 ```
 
 Run tests:
@@ -51,7 +82,7 @@ scripts/                 CLI utilities for sample data, prediction, backtest
 src/aquant/core/         Domain types and config loader
 src/aquant/data/         Local repository and sample data generator
 src/aquant/factors/      Factor definitions and preprocessing
-src/aquant/ml/           LightGBM trainer and prediction helpers
+src/aquant/ml/           Dataset builder, LightGBM trainer, and prediction helpers
 src/aquant/strategy/     Universe and portfolio construction
 src/aquant/risk/         Risk checks and kill-switch logic
 src/aquant/backtest/     Simple weekly rebalance backtester

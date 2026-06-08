@@ -13,7 +13,7 @@ from aquant.backtest.metrics import Metrics
 from aquant.core.config import load_config
 from aquant.data.repository import DataRepository
 from aquant.factors.service import FactorService
-from aquant.ml.predictor import HeuristicPredictor
+from aquant.ml.predictor import HeuristicPredictor, Predictor
 from aquant.risk.engine import RiskEngine
 from aquant.strategy.portfolio import PortfolioBuilder
 from aquant.strategy.universe import UniverseBuilder
@@ -25,6 +25,7 @@ def main() -> None:
     parser.add_argument("--data", default="data/sample")
     parser.add_argument("--start", required=True)
     parser.add_argument("--end", required=True)
+    parser.add_argument("--model", default=None, help="Optional trained model .joblib path")
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -35,7 +36,7 @@ def main() -> None:
         data_repo=repo,
         universe_builder=UniverseBuilder(repo, config),
         factor_service=FactorService(repo),
-        predictor=HeuristicPredictor(),
+        predictor=Predictor(args.model) if args.model else HeuristicPredictor(),
         portfolio_builder=PortfolioBuilder(config, risk_engine),
         risk_engine=risk_engine,
         broker=BacktestBroker.from_config(config, repo),

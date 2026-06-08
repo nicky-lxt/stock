@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from aquant.core.config import load_config
 from aquant.data.repository import DataRepository
 from aquant.factors.service import FactorService
-from aquant.ml.predictor import HeuristicPredictor
+from aquant.ml.predictor import HeuristicPredictor, Predictor
 from aquant.risk.engine import RiskEngine
 from aquant.strategy.portfolio import PortfolioBuilder
 from aquant.strategy.universe import UniverseBuilder
@@ -21,6 +21,7 @@ def main() -> None:
     parser.add_argument("--config", default="configs/strategy_lgbm_top5.yaml")
     parser.add_argument("--data", default="data/sample")
     parser.add_argument("--date", required=True, help="Prediction date, YYYY-MM-DD")
+    parser.add_argument("--model", default=None, help="Optional trained model .joblib path")
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -30,11 +31,14 @@ def main() -> None:
     universe_builder = UniverseBuilder(repo, config)
     risk_engine = RiskEngine(config, repo)
     factor_service = FactorService(repo)
-    predictor = HeuristicPredictor()
+    predictor = Predictor(args.model) if args.model else HeuristicPredictor()
     portfolio_builder = PortfolioBuilder(config, risk_engine)
 
     universe = universe_builder.build(predict_date)
     factors = factor_service.load_or_calculate(predict_date, universe)
+    if factors.empty:
+        raise SystemExit(f"No factors available for {predict_date}")
+
     predictions = predictor.predict(predict_date, factors)
     targets = portfolio_builder.build(predict_date, predictions)
 

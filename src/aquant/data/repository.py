@@ -82,6 +82,15 @@ class DataRepository:
         return bool(False if bar is None else bar.get("is_limit_down", False))
 
     def listed_days(self, ts_code: str, trade_date: date) -> int:
+        stock_rows = self.daily_bars[self.daily_bars["ts_code"] == ts_code]
+        if not stock_rows.empty and "list_date" in stock_rows:
+            list_date = stock_rows["list_date"].dropna()
+            if not list_date.empty:
+                first_list_date = list_date.iloc[0]
+                if isinstance(first_list_date, pd.Timestamp):
+                    first_list_date = first_list_date.date()
+                return max((trade_date - first_list_date).days, 0)
+
         bars = self.daily_bars[
             (self.daily_bars["ts_code"] == ts_code) & (self.daily_bars["trade_date"] <= trade_date)
         ]

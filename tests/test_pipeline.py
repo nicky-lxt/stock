@@ -9,6 +9,7 @@ from aquant.core.config import load_config
 from aquant.data.repository import DataRepository
 from aquant.data.sample import make_sample_daily_bars, make_sample_index_members
 from aquant.factors.service import FactorService
+from aquant.ml.dataset import DatasetBuilder
 from aquant.ml.predictor import HeuristicPredictor
 from aquant.risk.engine import RiskEngine
 from aquant.strategy.portfolio import PortfolioBuilder
@@ -42,6 +43,23 @@ def test_universe_factors_and_portfolio() -> None:
     assert len(factors) == 8
     assert len(targets) == 5
     assert round(sum(target.target_weight for target in targets), 6) == 1.0
+
+
+def test_dataset_builder_creates_forward_excess_labels() -> None:
+    config = load_config("configs/strategy_lgbm_top5.yaml")
+    repo = make_repo()
+    builder = DatasetBuilder(
+        repo,
+        UniverseBuilder(repo, config),
+        FactorService(repo),
+    )
+
+    dataset = builder.build(date(2023, 2, 1), date(2023, 7, 31), horizon=5)
+
+    assert not dataset.frame.empty
+    assert dataset.label_col in dataset.frame
+    assert dataset.feature_cols
+    assert dataset.frame[dataset.label_col].notna().all()
 
 
 def test_backtest_smoke() -> None:
