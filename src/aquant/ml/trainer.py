@@ -30,6 +30,7 @@ class LightGBMTrainer:
             colsample_bytree=0.8,
             objective="regression",
             random_state=42,
+            verbosity=-1,
         )
 
         model.fit(
