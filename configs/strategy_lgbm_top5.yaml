@@ -1,0 +1,67 @@
+app:
+  env: local
+  timezone: Asia/Shanghai
+
+data:
+  storage:
+    parquet_root: ./data
+
+strategy:
+  name: lgbm_top5_weekly
+  universe:
+    indexes:
+      - "000300.SH"
+      - "000905.SH"
+  rebalance:
+    frequency: weekly
+    day: Monday
+    signal_time: previous_close
+    execute_time: "09:35"
+  portfolio:
+    max_positions: 5
+    min_positions: 3
+    weight_method: equal
+    default_single_weight: 0.20
+    single_stock_soft_cap: 0.30
+    single_stock_hard_cap: 0.50
+    allow_manual_confirm_above_soft_cap: true
+  filters:
+    exclude_st: true
+    exclude_suspended: true
+    exclude_new_stock_days: 120
+    min_avg_amount_20d: 200000000
+    exclude_limit_up_buy: true
+    exclude_limit_down_buy: true
+
+model:
+  type: lightgbm
+  label: future_5d_excess_return
+  train_window_years: 5
+  validation_months: 6
+  retrain_frequency: monthly
+  features:
+    neutralize_industry: false
+    neutralize_market_cap: false
+    winsorize: true
+    standardize: true
+
+risk:
+  max_single_position_auto: 0.30
+  max_single_position_manual: 0.50
+  max_industry_exposure: 0.60
+  max_daily_loss: 0.025
+  max_weekly_loss: 0.05
+  max_drawdown: 0.10
+  weak_market_max_position: 0.50
+  normal_market_max_position: 0.70
+  strong_market_max_position: 1.00
+  kill_switch_enabled: false
+  reduce_only: false
+
+backtest:
+  initial_cash: 1000000
+  commission_rate: 0.0003
+  stamp_tax_rate: 0.001
+  transfer_fee_rate: 0.00001
+  slippage_bps: 5
+  lot_size: 100

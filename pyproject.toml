@@ -1,0 +1,30 @@
+[project]
+name = "aquant"
+version = "0.1.0"
+description = "A-share AI factor quant trading system scaffold"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "joblib",
+    "lightgbm",
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "pydantic",
+    "pyyaml",
+    "scikit-learn",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
