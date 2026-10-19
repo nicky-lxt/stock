@@ -90,6 +90,17 @@ src/aquant/trading/      Paper/QMT gateway abstractions
 tests/                   Smoke tests for the MVP pipeline
 ```
 
+## MCP: REA
+
+This project registers [REA](https://github.com/morluto/rea) (`rea-agents@6.7.0`) in
+`.cursor/mcp.json` for Cursor. After pulling the branch:
+
+1. Install Node.js `22.x (>=22.19)`, `24.x (>=24.11)`, or `26+`
+2. Restart Cursor and enable the `rea` MCP in Customize → MCPs
+3. Optional: run `npx rea-agents@6.7.0 setup --client cursor --yes` to also install the REA skill
+
+REA is for analyzing software you own or are authorized to examine. Native deep analysis still needs Hopper, Ghidra, or IDA if you use those providers.
+
 ## Notes
 
 This repository is a first local implementation scaffold, not a production trading system yet.
